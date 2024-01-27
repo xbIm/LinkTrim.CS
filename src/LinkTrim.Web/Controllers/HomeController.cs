@@ -20,12 +20,22 @@ public class HomeController : Controller
     {
         return View();
     }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public Task<ViewResult> Index(UrlRequest request)
+    {
+        _logger.LogDebug("text:" + request.Value);
+        return Task.FromResult(View("Success"));
+    }
 
     public IActionResult Privacy()
     {
         ViewBag.Host = _options.Value.Host;
         return View();
     }
+
+  
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
