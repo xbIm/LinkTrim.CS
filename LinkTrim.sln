@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkTrim.Web", "src\LinkTrim.Web\LinkTrim.Web.csproj", "{520168FC-2DD0-49C4-A965-B6583D4A0F75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkTrim.Tests", "src\LinkTrim.Tests\LinkTrim.Tests.csproj", "{81BE9C75-746F-48A2-B589-C8D2ADDA1C2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{520168FC-2DD0-49C4-A965-B6583D4A0F75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{520168FC-2DD0-49C4-A965-B6583D4A0F75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{520168FC-2DD0-49C4-A965-B6583D4A0F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{520168FC-2DD0-49C4-A965-B6583D4A0F75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81BE9C75-746F-48A2-B589-C8D2ADDA1C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81BE9C75-746F-48A2-B589-C8D2ADDA1C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81BE9C75-746F-48A2-B589-C8D2ADDA1C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81BE9C75-746F-48A2-B589-C8D2ADDA1C2A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,14 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+.idea
+
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
