@@ -4,11 +4,13 @@
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:5000",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5100",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "REDIS_CONNECTION" : "localhost:6379 "
+        "REDIS_CONNECTION" : "127.0.0.1:6379,abortConnect=false",
+        "OPTIONS__EXPIRED" : "00:01:00",
+        "OPTIONS__HOST": "http://localhost:5100/"
       }
     }
   }

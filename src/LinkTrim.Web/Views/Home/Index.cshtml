@@ -1,18 +1,18 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model UrlRequest
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <h2>Post a URL Request</h2>
-        <form method="post">
-            <div>
-                <label for="url">URL:</label>
-                <input type="text" id="url" name="Value" />
+    <h1 class="display-4">Welcome to LinkTrim.cs</h1>
+    <p style="font-size: 16px;">Your go-to tool for creating sleek, shortened URLs in seconds! Whether you're sharing content,
+        tracking clicks, or simply tidying up those long, messy links, LinkTrim has you covered.</p>
+    @using (Html.BeginForm()){
+        <div class="row">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Value, htmlAttributes: new { @class = "text-black control-label col-md-2" })
+                @Html.TextBoxFor(model => model.Value,
+    new { @class = "form-control", placeholder = "", required = "required" , autocomplete="off" })
+                @Html.ValidationMessageFor(model => model.Value,"", new { @class = "text-danger" })
             </div>
-            <div>
-                <button type="submit">Submit</button>
-            </div>
-        </form>
+        </div>
+        <button type="submit" class="btn btn-primary">LinkTrim the url</button>
+    }
 </div>

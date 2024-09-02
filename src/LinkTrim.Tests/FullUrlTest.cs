@@ -8,8 +8,8 @@ public class FullUrlTest
     public void Create_ValidUrl_ReturnsFullUrlObject()
     {
         // Arrange
-        var validUrl = "https://www.example.com/test-url   ";
-        var expectedTrimmedUrl = "https://www.example.com/test-url";
+        const string validUrl = "https://www.example.com/test-url   ";
+        const string expectedTrimmedUrl = "https://www.example.com/test-url";
 
         // Act
         var result = FullUrl.Create(validUrl);
@@ -23,7 +23,7 @@ public class FullUrlTest
     public void Create_InvalidUrl_ReturnsError()
     {
         // Arrange
-        var invalidUrl = "not_a_valid_url";
+        const string invalidUrl = "not_a_valid_url";
 
         // Act
         var result = FullUrl.Create(invalidUrl);

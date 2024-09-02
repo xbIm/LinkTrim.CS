@@ -1,4 +1,12 @@
-
+@model FullUrl
 <div class="text-center">
-  <h1 class="display-4">Success</h1>
+    <div style="font-size: 40px" id="short-link-result">
+        <p>Here's your shortened link:</p>
+
+        <a id="short-link" href="@Model.Value" target="_blank">@Model.Value</a>
+    </div>
+    <br/>
+  <div id="thank-you" style="font-size: 25px;">
+    <p>Thank you for using our services!</p>
+  </div>
 </div>

@@ -24,9 +24,7 @@ public record FullUrl
 
             return Result<FullUrl, Errors>.Succeeded(new FullUrl(trimmedUrl));
         }
-        else
-        {
-            return Result<FullUrl, Errors>.Failed(new WrongFormat("Invalid URL"));
-        }
+
+        return Result<FullUrl, Errors>.Failed(new WrongFormat("Invalid URL"));
     }
 }
