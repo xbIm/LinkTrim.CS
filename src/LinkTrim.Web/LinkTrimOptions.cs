@@ -2,7 +2,9 @@ namespace LinkTrim.Web;
 
 public class LinkTrimOptions
 {
-    public required string Host { get; set; }
+    public required string Host { get; init; }
 
-    public int MaxAttempts { get; set; }
+    public int MaxAttempts { get; init; } = 10;
+
+    public TimeSpan Expired { get; init; } = TimeSpan.FromDays(365);
 }

@@ -1,5 +1,10 @@
+using LinkTrim.Web;
 using LinkTrim.Web.Services;
+
+using Microsoft.Extensions.Options;
+
 using StackExchange.Redis;
+
 using Testcontainers.Redis;
 
 namespace LinkTrim.Tests.IntegrationTests
@@ -10,10 +15,9 @@ namespace LinkTrim.Tests.IntegrationTests
         private IStorage _storage = null!;
 
         [Fact]
+        [Trait("Category", "Integration")]
         public async Task PingRedis_Successfully()
         {
-            // Arrange (already done in InitializeAsync)
-
             // Act
             var server = _redisConnection.GetServer(_redisConnection.GetEndPoints()[0]);
             var result = await server.PingAsync();
@@ -23,12 +27,13 @@ namespace LinkTrim.Tests.IntegrationTests
         }
 
         [Fact]
+        [Trait("Category", "Integration")]
         public async Task SetAndGetKey_Successfully()
         {
             // Arrange
             var database = _redisConnection.GetDatabase();
-            string key = "test_key";
-            string expectedValue = "test_value";
+            const string key = "test_key";
+            const string expectedValue = "test_value";
 
             // Act
             await database.StringSetAsync(key, expectedValue);
@@ -39,38 +44,42 @@ namespace LinkTrim.Tests.IntegrationTests
         }
 
         [Fact]
+        [Trait("Category", "Integration")]
         public async Task SetLongUrl_Successfully()
         {
             // Arrange
-            var shortUrl = "abcde";
-            var longurl = "https://example.com";
+            const string shortUrl = "abcde";
+            const string longurl = "https://example.com";
 
             // Act
             await _storage.SetUrl(shortUrl, longurl);
-            var exists = await _storage.Exists(longurl);
+            var exists = await _storage.Exists(shortUrl);
+            var existsValue = await _storage.ExistsValue(longurl);
             var result = await _storage.GetUrl(shortUrl);
 
             // Assert
             Assert.True(exists);
+            Assert.True(existsValue.HasValue);
             Assert.Equal(longurl, result.Value);
         }
 
         [Fact]
+        [Trait("Category", "Integration")]
         public async Task RemoveUrl_KeyExists_RemovesKeyAndIndex()
         {
             // Arrange
-            var shortUrl = "abcde";
-            var longurl = "https://example.com";
+            const string shortUrl = "abcde";
+            const string longurl = "https://example.com";
             await _storage.SetUrl(shortUrl, longurl);
 
             // Act
             await _storage.Remove(shortUrl);
+            var keyExists = await _storage.Exists(shortUrl);
+            var valueExists = await _storage.ExistsValue(longurl);
 
             // Assert
-            var valueExists = await _storage.Exists(longurl);
-            var keyExists = await _storage.GetUrl(shortUrl);
-            Assert.False(keyExists.HasValue);
-            Assert.False(valueExists);
+            Assert.False(keyExists);
+            Assert.False(valueExists.HasValue);
         }
 
         public async Task InitializeAsync()
@@ -86,7 +95,7 @@ namespace LinkTrim.Tests.IntegrationTests
             await redisContainer.StartAsync();
 
             _redisConnection = await ConnectionMultiplexer.ConnectAsync(connectionString);
-            _storage = new UrlStorage(_redisConnection);
+            _storage = new UrlStorage(_redisConnection, new OptionsWrapper<LinkTrimOptions>(new LinkTrimOptions { Host = "http://localhost:5000" }));
         }
 
         public Task DisposeAsync()

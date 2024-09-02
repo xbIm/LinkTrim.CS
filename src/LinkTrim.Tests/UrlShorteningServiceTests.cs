@@ -2,9 +2,12 @@ using LinkTrim.Web;
 using LinkTrim.Web.Models;
 using LinkTrim.Web.Services;
 using LinkTrim.Web.Services.Strategies;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using NSubstitute;
+
 using SimpleResult;
 
 namespace LinkTrim.Tests
@@ -12,13 +15,9 @@ namespace LinkTrim.Tests
     public class UrlShorteningServiceTests
     {
         private readonly IStorage _mockStorage = Substitute.For<IStorage>();
-        private readonly IOptions<LinkTrimOptions> _options = Substitute.For<IOptions<LinkTrimOptions>>();
 
-        public UrlShorteningServiceTests()
-        {
-            _options.Value.Returns(new LinkTrimOptions() { Host = "", MaxAttempts = 10 });
-        }
-
+        private readonly IOptions<LinkTrimOptions> _options =
+            Options.Create(new LinkTrimOptions() { Host = "http://test/" });
 
         [Fact]
         public async Task ShortenUrl_WithMockStorage_Successfully()
@@ -26,13 +25,10 @@ namespace LinkTrim.Tests
             // Arrange
             var mockShorterStrategy = Substitute.For<IShortenerStrategy>();
             var logger = Substitute.For<ILogger<UrlShorteningService>>();
+            var urlShorteningService = new UrlShorteningService(logger, _options, _mockStorage, mockShorterStrategy);
 
-            var urlShorteningService = new UrlShorteningService(logger, _options,  _mockStorage, mockShorterStrategy);
-
-            var longUrl =  FullUrl.Create("https://www.example.com/very-long-url-that-needs-shortening").Success;
-            string key = "abc123";
-            //todo: decide which level add short.url
-            string shortUrl = "http://short.url/" + key;
+            var longUrl = FullUrl.Create("https://www.example.com/very-long-url-that-needs-shortening").Success;
+            const string key = "abc123";
 
             _mockStorage.Exists(key).Returns(false);
             _mockStorage.SetUrl(key, longUrl.Value).Returns(Task.CompletedTask);
@@ -42,7 +38,7 @@ namespace LinkTrim.Tests
             var result = await urlShorteningService.ShortenUrl(longUrl);
 
             // Assert
-            Assert.Equal(key, result.Success);
+            Assert.Equal("http://test/" + key, result.Success.Value);
             await _mockStorage.Received().Exists(key);
             await _mockStorage.Received().SetUrl(key, longUrl.Value);
         }
@@ -53,12 +49,11 @@ namespace LinkTrim.Tests
             // Arrange
             var mockShortenerStrategy = Substitute.For<IShortenerStrategy>();
             var logger = Substitute.For<ILogger<UrlShorteningService>>();
-            var options = Substitute.For<IOptions<LinkTrimOptions>>();
 
-            var urlShorteningService = new UrlShorteningService(logger, options, _mockStorage, mockShortenerStrategy);
+            var urlShorteningService = new UrlShorteningService(logger, _options, _mockStorage, mockShortenerStrategy);
 
-            var key = "abc123";
-            var longUrl = "https://www.example.com/very-long-url-that-needs-shortening";
+            const string key = "abc123";
+            const string longUrl = "https://www.example.com/very-long-url-that-needs-shortening";
 
             _mockStorage.GetUrl(key).Returns(longUrl.ToOption());
 
@@ -79,7 +74,7 @@ namespace LinkTrim.Tests
 
             var urlShorteningService = new UrlShorteningService(logger, _options, _mockStorage, mockShortenerStrategy);
 
-            var key = "abc123";
+            const string key = "abc123";
 
             _mockStorage.GetUrl(key).Returns(Option<string>.None);
 

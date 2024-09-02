@@ -1,11 +1,15 @@
 using LinkTrim.Web.Models;
 using LinkTrim.Web.Services.Strategies;
+
 using Microsoft.Extensions.Options;
+
+using SerilogTimings;
+
 using SimpleResult;
 
 namespace LinkTrim.Web.Services;
 
-public class UrlShorteningService: IUrlShorteningService
+public class UrlShorteningService : IUrlShorteningService
 {
     private readonly ILogger<UrlShorteningService> _logger;
     private readonly LinkTrimOptions _options;
@@ -24,34 +28,54 @@ public class UrlShorteningService: IUrlShorteningService
         _shortenerStrategy = shortenerStrategy;
     }
 
-    public async Task<Result<string, Errors>> ShortenUrl(FullUrl longUrl)
+    public async Task<Result<FullUrl, Errors>> ShortenUrl(FullUrl longUrl)
     {
-        var attempt = 0;
-        while (attempt < _options.MaxAttempts)
+        var valueExists = await _storage.ExistsValue(longUrl.Value);
+        if (valueExists.HasValue)
         {
-            var shortUrl = _shortenerStrategy.ShortenUrl(longUrl, attempt);
-            if (await _storage.Exists(shortUrl))
+            return ToFullUrl(valueExists.Value);
+        }
+
+        var attempt = 0;
+        using (var op = Operation.Begin("Generate short url for {LongUrl}", longUrl.Value))
+        {
+            while (attempt < _options.MaxAttempts)
             {
-                attempt++;
-            }
-            else
-            {
-                await _storage.SetUrl(shortUrl, longUrl.Value);
-                return shortUrl.ToSuccess<string, Errors>();
+                var shortUrl = _shortenerStrategy.ShortenUrl(longUrl, attempt);
+                if (await _storage.Exists(shortUrl))
+                {
+                    attempt++;
+                    continue;
+                }
+
+                using (Operation.Time("Save url {ShortUrl} with {LongUrl} attempt:{Attempt}",
+                           shortUrl,
+                           longUrl.Value,
+                           attempt))
+                {
+                    op.Complete();
+                    await _storage.SetUrl(shortUrl, longUrl.Value);
+                    return ToFullUrl(shortUrl);
+                }
             }
         }
 
-        return Result<string, Errors>.Failed(new ServerError("too many collisions"));
+        return Result<FullUrl, Errors>.Failed(new ServerError("too many collisions"));
     }
 
     public async Task<Result<FullUrl, Errors>> GetOriginalUrl(string shortUrl)
     {
-        var value = await _storage.GetUrl(shortUrl);
-        if (!value.HasValue)
+        using (Operation.Time("Get Original Url for {ShortUrl}", shortUrl))
         {
-            return Result<FullUrl, Errors>.Failed(new ShortCodeNotFound());
+            var value = await _storage.GetUrl(shortUrl);
+            return !value.HasValue ?
+                Result<FullUrl, Errors>.Failed(new ShortCodeNotFound()) :
+                FullUrl.Create(value.Value);
         }
+    }
 
-        return FullUrl.Create(value.Value);
+    private Result<FullUrl, Errors> ToFullUrl(string shortCode)
+    {
+        return FullUrl.Create(_options.Host + shortCode);
     }
 }

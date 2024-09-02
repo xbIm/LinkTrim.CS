@@ -1,6 +1,7 @@
-using System;
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+
 using LinkTrim.Web.Models;
 
 namespace LinkTrim.Web.Services.Strategies;
@@ -12,15 +13,16 @@ public class HashShortenerStrategy : IShortenerStrategy
         // Combine the URL value with the attempt for uniqueness
         string combinedInput = url.Value + attempt;
 
-        using var algorithm = MD5.Create();
         byte[] inputBytes = Encoding.UTF8.GetBytes(combinedInput);
-        byte[] hashBytes = algorithm.ComputeHash(inputBytes);
 
-        // Convert the byte array to a hexadecimal string
-        StringBuilder sb = new StringBuilder();
+        #pragma warning disable CA5351
+        byte[] hashBytes = MD5.HashData(inputBytes.AsSpan());
+        #pragma warning restore CA5351
+
+        var sb = new StringBuilder();
         for (int i = 0; i < 4; i++) // We take only first 3 bytes to get 6 hexadecimal characters
         {
-            sb.Append(hashBytes[i].ToString("X2"));
+            sb.Append(hashBytes[i].ToString("X2", CultureInfo.InvariantCulture));
         }
 
         string result = ConvertHexToCustomFormat(
@@ -38,7 +40,7 @@ public class HashShortenerStrategy : IShortenerStrategy
         int baseValue = customChars.Length;
 
         // Perform custom base conversion
-        string result = "";
+        var result = string.Empty;
         while (decimalValue > 0)
         {
             result = customChars[(int)(decimalValue % baseValue)] + result;
@@ -47,5 +49,4 @@ public class HashShortenerStrategy : IShortenerStrategy
 
         return result;
     }
-
 }
